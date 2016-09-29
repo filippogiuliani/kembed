@@ -1,0 +1,41 @@
+
+
+ARMGNU ?= arm-none-eabi
+MAKE = /usr/bin/make
+
+CFLAGS = -Wall -O2 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s
+IFLAGS =
+LFLAGS = -nostartfiles		\
+         --no-undefined
+
+BIN_DIR_FROM_MAIN = bin/
+BIN_DIR = ../$(BIN_DIR_FROM_MAIN)
+OBJ_DIR = ../obj/
+
+CONFIG =
+
+MODULE_ALIGNMENT = 0x10
+SECTION_ALIGNMENT = 0x10
+
+ifndef build
+	BUILD = release
+else
+	BUILD = $(build)
+	CFLAGS += -g -ggdb
+	CONFIG += -DDEBUG
+endif
+
+
+ifndef verbose
+	HIDE = @
+	FOUT = > /dev/null
+	MFLAGS = -s
+else
+	HIDE =
+	FOUT =
+	MFLAGS =
+endif
+
+$(OBJ_DIR)%.o: %.c
+	@echo "generating $@ from $<" $(FOUT)
+	$(HIDE)$(ARMGNU)-gcc -c $(CONFIG) $(CFLAGS) $(IFLAGS) $< -o $@ $(FOUT)
