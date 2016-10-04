@@ -29,11 +29,9 @@ print ('/***********************************************************************
        '	}                                                                      \n');
 
 
-index = range(3, len(sys.argv))
-
-di=sys.argv[1]
-alignmodule=sys.argv[2]
-alignsection=sys.argv[3]
+di="obj/"
+alignmodule=sys.argv[1]
+alignsection=sys.argv[2]
 
 def element ( name, lista ):
     mname = name[0].upper() + name[1:];
@@ -51,7 +49,8 @@ def element ( name, lista ):
     for el in lista:
            elmname = el[0].upper() + el[1:];
            print ('		__s' + elmname + mname + ' = .;                        \n'
-                  '		' + el + '/' + di + el + '.o(.' + name + ')            \n'
+                  '		' + el + '/' + di + el + '.o(.' + name + ');            \n'
+                  '		. += __s' + elmname + mname + ' == . ? ' + alignmodule + ' : 0x0;\n'
                   '		. = ALIGN (' + alignmodule + ');                       \n'
                   '		__e' + elmname + mname + ' = .;                        \n');
     print ('	}                                                                      \n'
@@ -60,10 +59,10 @@ def element ( name, lista ):
     return
 
 
-element ( "text", sys.argv[4:]);
-element ( "data", sys.argv[4:]);
-element ( "rodata", sys.argv[4:]);
-element ( "bss", sys.argv[4:]);
+element ( "text", sys.argv[3:]);
+element ( "data", sys.argv[3:]);
+element ( "rodata", sys.argv[3:]);
+element ( "bss", sys.argv[3:]);
 
 
 print ('	. = ALIGN(32 / 8);                                                     \n'

@@ -1,18 +1,22 @@
-
-
 ARMGNU ?= arm-none-eabi
 MAKE = /usr/bin/make
+
+GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
 
 CFLAGS = -Wall -O2 -mfpu=vfp -mfloat-abi=hard -march=armv6zk -mtune=arm1176jzf-s
 IFLAGS =
 LFLAGS = -nostartfiles		\
          --no-undefined
 
-BIN_DIR_FROM_MAIN = bin/
-BIN_DIR = ../$(BIN_DIR_FROM_MAIN)
+MODULES = boot asm kernel baselib device
+
+OBJECTS := $(foreach module,$(MODULES),$(module)/obj/$(module).o)
+ABSOLUTE_OBJECTS := $(foreach object,$(OBJECTS),$(KEMBED_ROOT)/$(object))
+
+DEP_DIR = ../dep/
 OBJ_DIR = ../obj/
 
-CONFIG =
+CONFIG = -DVERSION=\"$(GIT_VERSION)\"
 
 MODULE_ALIGNMENT = 0x10
 SECTION_ALIGNMENT = 0x10
@@ -36,6 +40,16 @@ else
 	MFLAGS =
 endif
 
-$(OBJ_DIR)%.o: %.c
+.PHONY: all
+
+
+$(DEP_DIR)%.o: %.c
 	@echo "generating $@ from $<" $(FOUT)
 	$(HIDE)$(ARMGNU)-gcc -c $(CONFIG) $(CFLAGS) $(IFLAGS) $< -o $@ $(FOUT)
+
+
+$(DEP_DIR) : 
+	$(HIDE)mkdir $@
+
+$(OBJ_DIR) : 
+	$(HIDE)mkdir $@

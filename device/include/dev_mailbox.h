@@ -103,8 +103,8 @@ typedef enum
     DEV_TAG_GET_PALETTE = 0x4000B,
     DEV_TAG_TEST_PALETTE = 0x4400B,
     DEV_TAG_SET_PALETTE = 0x4800B,
-    DEV_TAG_SET_CURSOR_INFO = 0x8011,
-    DEV_TAG_SET_CURSOR_STATE = 0x8010
+    DEV_TAG_SET_CURSOR_INFO = 0x8010,
+    DEV_TAG_SET_CURSOR_STATE = 0x8011
 } device_mailbox_tag_t;
 
 
@@ -112,12 +112,8 @@ typedef struct
 {
     sint32 tag;
     sint32 byte_length;
-    union
-    {
-        sint32 value_32;
-        uint8 buffer_8[256];
-        sint32 buffer_32[64];
-    } data;
+    sint32 indicator;
+    uint32 buffer[256];
 } device_mailbox_property_t;
 
 
@@ -126,6 +122,7 @@ typedef struct
  ***** Public function definitions                                        *****
  ******************************************************************************/
 
+uint16 * device_prova (void );
 void device_propertyInit( void );
 void device_propertyAddTag( device_mailbox_tag_t tag, ... );
 sint32 device_propertyProcess( void );

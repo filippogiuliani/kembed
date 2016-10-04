@@ -29,27 +29,32 @@ SECTIONS {
 	{                                                                      
 
 		__sBootText = .;                        
-		boot/bin/boot.o(.text*)            
+		boot/obj/boot.o(.text*);            
+		. += __sBootText == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eBootText = .;                        
 
 		__sAsmText = .;                        
-		asm/bin/asm.o(.text*)            
+		asm/obj/asm.o(.text*);            
+		. += __sAsmText == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eAsmText = .;                        
 
 		__sKernelText = .;                        
-		kernel/bin/kernel.o(.text*)            
+		kernel/obj/kernel.o(.text*);            
+		. += __sKernelText == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eKernelText = .;                        
 
 		__sBaselibText = .;                        
-		baselib/bin/baselib.o(.text*)            
+		baselib/obj/baselib.o(.text*);            
+		. += __sBaselibText == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eBaselibText = .;                        
 
 		__sDeviceText = .;                        
-		device/bin/device.o(.text*)            
+		device/obj/device.o(.text*);            
+		. += __sDeviceText == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eDeviceText = .;                        
 
@@ -62,27 +67,32 @@ SECTIONS {
 	{                                                                      
 
 		__sBootData = .;                        
-		boot/bin/boot.o(.data)            
+		boot/obj/boot.o(.data);            
+		. += __sBootData == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eBootData = .;                        
 
 		__sAsmData = .;                        
-		asm/bin/asm.o(.data)            
+		asm/obj/asm.o(.data);            
+		. += __sAsmData == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eAsmData = .;                        
 
 		__sKernelData = .;                        
-		kernel/bin/kernel.o(.data)            
+		kernel/obj/kernel.o(.data);            
+		. += __sKernelData == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eKernelData = .;                        
 
 		__sBaselibData = .;                        
-		baselib/bin/baselib.o(.data)            
+		baselib/obj/baselib.o(.data);            
+		. += __sBaselibData == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eBaselibData = .;                        
 
 		__sDeviceData = .;                        
-		device/bin/device.o(.data)            
+		device/obj/device.o(.data);            
+		. += __sDeviceData == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eDeviceData = .;                        
 
@@ -95,27 +105,32 @@ SECTIONS {
 	{                                                                      
 
 		__sBootRodata = .;                        
-		boot/bin/boot.o(.rodata*)            
+		boot/obj/boot.o(.rodata*);            
+		. += __sBootRodata == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eBootRodata = .;                        
 
 		__sAsmRodata = .;                        
-		asm/bin/asm.o(.rodata*)            
+		asm/obj/asm.o(.rodata*);            
+		. += __sAsmRodata == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eAsmRodata = .;                        
 
 		__sKernelRodata = .;                        
-		kernel/bin/kernel.o(.rodata*)            
+		kernel/obj/kernel.o(.rodata*);            
+		. += __sKernelRodata == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eKernelRodata = .;                        
 
 		__sBaselibRodata = .;                        
-		baselib/bin/baselib.o(.rodata*)            
+		baselib/obj/baselib.o(.rodata*);            
+		. += __sBaselibRodata == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eBaselibRodata = .;                        
 
 		__sDeviceRodata = .;                        
-		device/bin/device.o(.rodata*)            
+		device/obj/device.o(.rodata*);            
+		. += __sDeviceRodata == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eDeviceRodata = .;                        
 
@@ -128,27 +143,32 @@ SECTIONS {
 	{                                                                      
 
 		__sBootBss = .;                        
-		boot/bin/boot.o(.bss* COMMON)            
+		boot/obj/boot.o(.bss* COMMON);            
+		. += __sBootBss == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eBootBss = .;                        
 
 		__sAsmBss = .;                        
-		asm/bin/asm.o(.bss* COMMON)            
+		asm/obj/asm.o(.bss* COMMON);            
+		. += __sAsmBss == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eAsmBss = .;                        
 
 		__sKernelBss = .;                        
-		kernel/bin/kernel.o(.bss* COMMON)            
+		kernel/obj/kernel.o(.bss* COMMON);            
+		. += __sKernelBss == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eKernelBss = .;                        
 
 		__sBaselibBss = .;                        
-		baselib/bin/baselib.o(.bss* COMMON)            
+		baselib/obj/baselib.o(.bss* COMMON);            
+		. += __sBaselibBss == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eBaselibBss = .;                        
 
 		__sDeviceBss = .;                        
-		device/bin/device.o(.bss* COMMON)            
+		device/obj/device.o(.bss* COMMON);            
+		. += __sDeviceBss == . ? 0x10 : 0x0;
 		. = ALIGN (0x10);                       
 		__eDeviceBss = .;                        
 

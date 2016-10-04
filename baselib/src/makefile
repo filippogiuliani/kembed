@@ -1,22 +1,16 @@
+KEMBED_ROOT:=..
+include $(KEMBED_ROOT)/Make.def
 
-include ../../Make.def
+SRCS = baselib.c blib_utils.c
 
-SRCS =  blib_utils.c
+DEPS = $(patsubst %,$(DEP_DIR)%,$(patsubst %.c,%.o,$(SRCS)))
 
-OBJS := $(patsubst %,$(OBJ_DIR)%,$(patsubst %.c,%.o,$(SRCS)))
+IFLAGS += -I../../baselib/include
 
-IFLAGS += -I../../baselib/include 	\
-	-I../../device/include		\
+
+all : $(DEP_DIR) $(DEPS) $(OBJ_DIR)
+	$(HIDE)$(ARMGNU)-ld -r $(DEPS) -o $(OBJ_DIR)baselib.o $(FOUT)
 
 clean :
+	$(HIDE)rm -rf $(DEP_DIR)
 	$(HIDE)rm -rf $(OBJ_DIR)
-	$(HIDE)rm -rf $(BIN_DIR)
-
-baselib.o : $(OBJ_DIR) $(OBJS) $(BIN_DIR)
-	$(HIDE)$(ARMGNU)-ld -r $(OBJS) -o $(BIN_DIR)$@ $(FOUT)
-
-$(BIN_DIR) : 
-	$(HIDE)mkdir $@
-
-$(OBJ_DIR) : 
-	$(HIDE)mkdir $@

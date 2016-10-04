@@ -107,7 +107,7 @@ static sint32 dev_pt_index = 0;
  ***** Private function declaration                                       *****
  ******************************************************************************/
 
-static void device_mailbox0Write( device_mailbox0_channel_t channel, sint32 value );
+static void device_mailbox0Write( device_mailbox0_channel_t channel, uint32 value );
 
 static sint32 device_mailbox0Read( device_mailbox0_channel_t channel );
     
@@ -115,6 +115,29 @@ static sint32 device_mailbox0Read( device_mailbox0_channel_t channel );
 /******************************************************************************
  ***** Public function definitions                                        *****
  ******************************************************************************/
+
+static uint32 dev_frameBufferInfo[10] __attribute__ ((aligned (16))) =
+{
+    1680,  /* #0 Width */
+    1050,   /* #4 Height */
+    1680,  /* #8 vWidth */
+    1050,   /* #12 vHeight */
+    0,     /* #16 GPU - Pitch */
+    16,    /* #20 Bit Dpeth */
+    0,     /* #24 X */
+    0,     /* #28 Y */
+    0,     /* #32 GPU - Pointer */
+    0      /* #36 GPU - Size */
+};
+
+uint16* device_prova (void)
+{    
+    /** Initialize frame buffer */
+    device_mailbox0Write( MB0_FRAMEBUFFER, ((uint32)&dev_frameBufferInfo) + 0x40000000U );
+    device_mailbox0Read( MB0_FRAMEBUFFER );
+
+    return (uint16 *)dev_frameBufferInfo[8];
+}
 
 void device_propertyInit( void )
 {
@@ -167,13 +190,13 @@ void device_propertyAddTag( device_mailbox_tag_t tag, ... )
 	break;
 
     case DEV_TAG_ALLOCATE_BUFFER:
-	dev_pt[dev_pt_index++] = 8;
+	dev_pt[dev_pt_index++] = 4;
 	dev_pt[dev_pt_index++] = 0; /* Request */
-	dev_pt[dev_pt_index++] = va_arg( vl, int );
-	dev_pt_index += 1;
+	dev_pt[dev_pt_index++] = 0x10;	
+	/* dev_pt[dev_pt_index++] = va_arg( vl, int ); */
+	/* dev_pt_index += 1; */
 	break;
 
-    case DEV_TAG_GET_PHYSICAL_SIZE:
     case DEV_TAG_SET_PHYSICAL_SIZE:
     case DEV_TAG_TEST_PHYSICAL_SIZE:
     case DEV_TAG_GET_VIRTUAL_SIZE:
@@ -200,27 +223,23 @@ void device_propertyAddTag( device_mailbox_tag_t tag, ... )
 	break;
 
 
-    case DEV_TAG_GET_ALPHA_MODE:
     case DEV_TAG_SET_ALPHA_MODE:
-    case DEV_TAG_GET_DEPTH:
     case DEV_TAG_SET_DEPTH:
-    case DEV_TAG_GET_PIXEL_ORDER:
     case DEV_TAG_SET_PIXEL_ORDER:
-    case DEV_TAG_GET_PITCH:
 	dev_pt[dev_pt_index++] = 4;
 	dev_pt[dev_pt_index++] = 0; /* Request */
 
-	if( ( tag == DEV_TAG_SET_DEPTH ) ||
-	    ( tag == DEV_TAG_SET_PIXEL_ORDER ) ||
-	    ( tag == DEV_TAG_SET_ALPHA_MODE ) )
-	{
-	    /* Colour Depth, bits-per-pixel \ Pixel Order State */
-	    dev_pt[dev_pt_index++] = va_arg( vl, int );
-	}
-	else
-	{
-	    dev_pt_index += 1;
-	}
+	/* Colour Depth, bits-per-pixel \ Pixel Order State */
+	dev_pt[dev_pt_index++] = va_arg( vl, int );
+	break;
+
+    case DEV_TAG_GET_ALPHA_MODE:
+    case DEV_TAG_GET_DEPTH:
+    case DEV_TAG_GET_PHYSICAL_SIZE:
+    case DEV_TAG_GET_PITCH:
+    case DEV_TAG_GET_PIXEL_ORDER:
+	dev_pt[dev_pt_index++] = 0; /* Length */
+	dev_pt[dev_pt_index++] = 0; /* Request */
 	break;
 
     case DEV_TAG_GET_OVERSCAN:
@@ -248,7 +267,7 @@ void device_propertyAddTag( device_mailbox_tag_t tag, ... )
     }
 
     /* Make sure the tags are 0 terminated to end the list and update the buffer size */
-    dev_pt[dev_pt_index] = 0;
+    /* dev_pt[dev_pt_index] = 0; */
 
     va_end( vl );
 }
@@ -259,10 +278,11 @@ sint32 device_propertyProcess( void )
     sint32 result;
 
     /* Fill in the size of the buffer */
+    dev_pt[dev_pt_index] = 0x0;
     dev_pt[PT_OSIZE] = ( dev_pt_index + 1 ) << 2;
     dev_pt[PT_OREQUEST_OR_RESPONSE] = 0;
 
-    device_mailbox0Write( MB0_TAGS_ARM_TO_VC, (uint32)dev_pt );
+    device_mailbox0Write( MB0_TAGS_ARM_TO_VC, (uint32)dev_pt + 0x40000000U );
 
     result = device_mailbox0Read( MB0_TAGS_ARM_TO_VC );
 
@@ -298,8 +318,9 @@ device_mailbox_property_t* device_propertyGet( device_mailbox_tag_t tag )
         return NULL;
 
     /* Return the required data */
-    property.byte_length = tag_buffer[T_ORESPONSE] & 0xFFFF;
-    blib_memcpy( property.data.buffer_8, &tag_buffer[T_OVALUE], property.byte_length );
+    property.byte_length = tag_buffer[T_OVALUE_SIZE];
+    property.indicator = tag_buffer[T_ORESPONSE];
+    blib_memcpy( (void*)&property.buffer[0], (void*)&tag_buffer[T_OVALUE], property.byte_length );
 
     return &property;
 }
@@ -310,7 +331,7 @@ device_mailbox_property_t* device_propertyGet( device_mailbox_tag_t tag )
  ******************************************************************************/
 
 
-static void device_mailbox0Write( device_mailbox0_channel_t channel, sint32 value )
+static void device_mailbox0Write( device_mailbox0_channel_t channel, uint32 value )
 {
     /* For information about accessing mailboxes, see:
        https://github.com/raspberrypi/firmware/wiki/Accessing-mailboxes */

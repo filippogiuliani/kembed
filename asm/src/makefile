@@ -1,23 +1,20 @@
-
-include ../../Make.def
+KEMBED_ROOT:=..
+include $(KEMBED_ROOT)/Make.def
 
 SRCS = 
 
-OBJS := $(patsubst %,$(OBJ_DIR)%,$(patsubst %.c,%.o,$(SRCS)))
+DEPS = $(patsubst %,$(DEP_DIR)%,$(patsubst %.c,%.o,$(SRCS)))
 
 IFLAGS += -I../../baselib/include 	\
-	-I../../boot/include
+          -I../../boot/include
+
+
+all : $(DEP_DIR) $(DEPS) $(OBJ_DIR) $(DEP_DIR)instruction.o
+	$(HIDE)$(ARMGNU)-ld -r $(DEPS) $(DEP_DIR)instruction.o -o $(OBJ_DIR)asm.o $(FOUT)
+
+$(DEP_DIR)instruction.o : instruction.s
+		      $(HIDE)$(ARMGNU)-as instruction.s -o $(DEP_DIR)instruction.o
 
 clean :
+	$(HIDE)rm -rf $(DEP_DIR)
 	$(HIDE)rm -rf $(OBJ_DIR)
-	$(HIDE)rm -rf $(BIN_DIR)
-
-asm.o : $(OBJ_DIR) $(OBJS) $(BIN_DIR)
-	$(HIDE)$(ARMGNU)-as instruction.s -o $(OBJ_DIR)instruction.o
-	$(HIDE)$(ARMGNU)-ld -r $(OBJS) $(OBJ_DIR)instruction.o -o $(BIN_DIR)$@ $(FOUT)
-
-$(BIN_DIR) : 
-	$(HIDE)mkdir $@
-
-$(OBJ_DIR) : 
-	$(HIDE)mkdir $@

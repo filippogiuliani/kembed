@@ -1,0 +1,2 @@
+KEMBED_ROOT:=$(KEMBED_ROOT)/..
+include $(KEMBED_ROOT)/Make.def
