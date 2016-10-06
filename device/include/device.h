@@ -5,12 +5,14 @@
  *    collecting all the device library.
  *
  *
- *    @file:      $File$
- *    @author:    $Author$
- *    @date:      $Date$
- *    @version:   $Revision$
+ *    File:       <FILE>
+ *    Author:     <AUTHORNAME>
+ *    Mail:       <AUTHORMAIL>
+ *    Date:       <COMMITTERDATEISO8601>
+ *    Ident:      <COMMITHASH>
+ *    Branch:     <BRANCH>
  *
- *    $Id$
+ *    <CHANGELOG:--reverse --grep "^tags.*relevant":-1:%an : %ai : %s>
  *
  *
  *    (C) Copyright 2016 Filippo Giuliani <mail@filippogiuliani.it>

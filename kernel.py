@@ -5,12 +5,14 @@
 #   This script generate the linker script to link kembed
 #
 #
-#    @file:      $File$
-#    @author:    $Author$
-#    @date:      $Date$
-#    @version:   $Revision$
+#    File:       <FILE>
+#    Author:     <AUTHORNAME>
+#    Mail:       <AUTHORMAIL>
+#    Date:       <COMMITTERDATEISO8601>
+#    Ident:      <COMMITHASH>
+#    Branch:     <BRANCH>
 #
-#    $Id$                   
+#    <CHANGELOG:--reverse --grep "^tags.*relevant":-1:%an : %ai : %s>
 #
 #
 #   (C) Copyright 2016 Filippo Giuliani <mail@filippogiuliani.it>
@@ -40,12 +42,14 @@ print ('/**                                                                     
        ' *    generate by kernel.py (invoked by the makefile).                         \n'
        ' *                                                                             \n'
        ' *                                                                             \n'
-       ' *    @file:      $File$                                                       \n'
-       ' *    @author:    $Author$                                                     \n'
-       ' *    @date:      $Date$                                                       \n'
-       ' *    @version:   $Revision$                                                   \n'
+       ' *    File:       <FILE>                                                       \n'
+       ' *    Author:     <AUTHORNAME>                                                 \n'
+       ' *    Mail:       <AUTHORMAIL>                                                 \n'
+       ' *    Date:       <COMMITTERDATEISO8601>                                       \n'
+       ' *    Ident:      <COMMITHASH>                                                 \n'
+       ' *    Branch:     <BRANCH>                                                     \n'
        ' *                                                                             \n'
-       ' *    $Id$                                                                     \n'
+       ' *    <CHANGELOG:--reverse --grep "^tags.*relevant":-1:%an : %ai : %s>         \n'
        ' *                                                                             \n'
        ' *                                                                             \n'
        ' *    (C) Copyright 2016 Filippo Giuliani <mail@filippogiuliani.it>            \n'
