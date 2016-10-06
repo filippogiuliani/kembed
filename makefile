@@ -4,10 +4,12 @@
 #   This file is part of the toolchain to compile kembed
 #
 #
-#   $LastChangedDate: 2016-07-22 21:42:37 -0700 (Sat, 22 Jul 2006) $
-#   $Revision: 144 $
-#   $Author: filippogiuliani $
-#   $Id: makefile 148 2006-07-28 21:30:43Z sally $
+#    @file:      $File$
+#    @author:    $Author$
+#    @date:      $Date$
+#    @version:   $Revision$
+#
+#    $Id$
 #
 #
 #   (C) Copyright 2016 Filippo Giuliani <mail@filippogiuliani.it>
