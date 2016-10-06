@@ -1,3 +1,32 @@
+/**
+ *    Mailbox Device
+ *    
+ *    This file implement the Mailbox Handler.
+ *
+ *
+ *    $LastChangedDate: 2016-07-22 21:42:37 -0700 (Sat, 22 Jul 2006) $
+ *    $Revision: 144 $
+ *    $Author: harry $
+ *    $Id: calc.c 148 2006-07-28 21:30:43Z sally $
+ *
+ *
+ *    (C) Copyright 2016 Filippo Giuliani <mail@filippogiuliani.it>
+ *
+ *    This file is part of kembed.
+ *
+ *    kembed is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    kembed is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with kembed.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 
 /******************************************************************************
@@ -116,29 +145,6 @@ static sint32 device_mailbox0Read( device_mailbox0_channel_t channel );
  ***** Public function definitions                                        *****
  ******************************************************************************/
 
-static uint32 dev_frameBufferInfo[10] __attribute__ ((aligned (16))) =
-{
-    1680,  /* #0 Width */
-    1050,   /* #4 Height */
-    1680,  /* #8 vWidth */
-    1050,   /* #12 vHeight */
-    0,     /* #16 GPU - Pitch */
-    16,    /* #20 Bit Dpeth */
-    0,     /* #24 X */
-    0,     /* #28 Y */
-    0,     /* #32 GPU - Pointer */
-    0      /* #36 GPU - Size */
-};
-
-uint16* device_prova (void)
-{    
-    /** Initialize frame buffer */
-    device_mailbox0Write( MB0_FRAMEBUFFER, ((uint32)&dev_frameBufferInfo) + 0x40000000U );
-    device_mailbox0Read( MB0_FRAMEBUFFER );
-
-    return (uint16 *)dev_frameBufferInfo[8];
-}
-
 void device_propertyInit( void )
 {
     /* Fill in the size on-the-fly */
@@ -167,21 +173,32 @@ void device_propertyAddTag( device_mailbox_tag_t tag, ... )
 
     switch( tag )
     {
-    case DEV_TAG_GET_FIRMWARE_VERSION:
     case DEV_TAG_GET_BOARD_MODEL:
     case DEV_TAG_GET_BOARD_REVISION:
-    case DEV_TAG_GET_BOARD_MAC_ADDRESS:
+    case DEV_TAG_GET_FIRMWARE_VERSION:
+	dev_pt[dev_pt_index++] = 4;
+	dev_pt[dev_pt_index++] = 0; /* Request with no payload */
+	/* Provide space for the response */
+	dev_pt[dev_pt_index++] = 0;
+	break;
     case DEV_TAG_GET_BOARD_SERIAL:
+    case DEV_TAG_GET_BOARD_MAC_ADDRESS:
     case DEV_TAG_GET_ARM_MEMORY:
     case DEV_TAG_GET_VC_MEMORY:
-    case DEV_TAG_GET_DMA_CHANNELS:
+	dev_pt[dev_pt_index++] = 8;
+	dev_pt[dev_pt_index++] = 0; /* Request with no payload */
+	/* Provide space for the response */
+	dev_pt[dev_pt_index++] = 0;
+	dev_pt[dev_pt_index++] = 0;
+	break;
+    case DEV_TAG_GET_DMA_CHANNELS:     /* DA RIVEDERE */
 	/* Provide an 8-byte buffer for the response */
 	dev_pt[dev_pt_index++] = 8;
 	dev_pt[dev_pt_index++] = 0; /* Request */
 	dev_pt_index += 2;
 	break;
 
-    case DEV_TAG_GET_CLOCKS:
+    case DEV_TAG_GET_CLOCKS:           /* DA RIVEDERE */
     case DEV_TAG_GET_COMMAND_LINE:
 	/* Provide a 256-byte buffer */
 	dev_pt[dev_pt_index++] = 256;
@@ -190,26 +207,27 @@ void device_propertyAddTag( device_mailbox_tag_t tag, ... )
 	break;
 
     case DEV_TAG_ALLOCATE_BUFFER:
-	dev_pt[dev_pt_index++] = 4;
-	dev_pt[dev_pt_index++] = 0; /* Request */
-	dev_pt[dev_pt_index++] = 0x10;	
-	/* dev_pt[dev_pt_index++] = va_arg( vl, int ); */
-	/* dev_pt_index += 1; */
+	dev_pt[dev_pt_index++] = 8;
+	dev_pt[dev_pt_index++] = 4; /* Request with 4 bytes of payload */
+	dev_pt[dev_pt_index++] = 0x10; /* Payload */
+	dev_pt[dev_pt_index++] = 0x0;
 	break;
 
     case DEV_TAG_SET_PHYSICAL_SIZE:
-    case DEV_TAG_TEST_PHYSICAL_SIZE:
-    case DEV_TAG_GET_VIRTUAL_SIZE:
     case DEV_TAG_SET_VIRTUAL_SIZE:
-    case DEV_TAG_TEST_VIRTUAL_SIZE:
-    case DEV_TAG_GET_VIRTUAL_OFFSET:
     case DEV_TAG_SET_VIRTUAL_OFFSET:
+	dev_pt[dev_pt_index++] = 8;
+	dev_pt[dev_pt_index++] = 8; /* Request with 8 bytes of payload */
+	dev_pt[dev_pt_index++] = va_arg( vl, int ); /* Width */
+	dev_pt[dev_pt_index++] = va_arg( vl, int ); /* Height */	
+	break;
+
+    case DEV_TAG_TEST_PHYSICAL_SIZE: /* DA RIVEDERE */
+    case DEV_TAG_TEST_VIRTUAL_SIZE:
 	dev_pt[dev_pt_index++] = 8;
 	dev_pt[dev_pt_index++] = 0; /* Request */
 
-	if( ( tag == DEV_TAG_SET_PHYSICAL_SIZE ) ||
-	    ( tag == DEV_TAG_SET_VIRTUAL_SIZE ) ||
-	    ( tag == DEV_TAG_SET_VIRTUAL_OFFSET ) ||
+	if( ( tag == DEV_TAG_SET_VIRTUAL_OFFSET ) ||
 	    ( tag == DEV_TAG_TEST_PHYSICAL_SIZE ) ||
 	    ( tag == DEV_TAG_TEST_VIRTUAL_SIZE ) )
 	{
@@ -222,27 +240,35 @@ void device_propertyAddTag( device_mailbox_tag_t tag, ... )
 	}
 	break;
 
-
-    case DEV_TAG_SET_ALPHA_MODE:
     case DEV_TAG_SET_DEPTH:
+    case DEV_TAG_SET_ALPHA_MODE:
     case DEV_TAG_SET_PIXEL_ORDER:
 	dev_pt[dev_pt_index++] = 4;
-	dev_pt[dev_pt_index++] = 0; /* Request */
+	dev_pt[dev_pt_index++] = 4; /* Request with 4 bytes of payload */
 
 	/* Colour Depth, bits-per-pixel \ Pixel Order State */
 	dev_pt[dev_pt_index++] = va_arg( vl, int );
 	break;
-
-    case DEV_TAG_GET_ALPHA_MODE:
-    case DEV_TAG_GET_DEPTH:
-    case DEV_TAG_GET_PHYSICAL_SIZE:
+	
     case DEV_TAG_GET_PITCH:
+    case DEV_TAG_GET_DEPTH:
+    case DEV_TAG_GET_ALPHA_MODE:
     case DEV_TAG_GET_PIXEL_ORDER:
-	dev_pt[dev_pt_index++] = 0; /* Length */
-	dev_pt[dev_pt_index++] = 0; /* Request */
+ 	dev_pt[dev_pt_index++] = 4; /* Length */
+	dev_pt[dev_pt_index++] = 0; /* Request with no payload */
+	dev_pt[dev_pt_index++] = 0;
 	break;
 
-    case DEV_TAG_GET_OVERSCAN:
+    case DEV_TAG_GET_PHYSICAL_SIZE:
+    case DEV_TAG_GET_VIRTUAL_SIZE:
+    case DEV_TAG_GET_VIRTUAL_OFFSET:
+	dev_pt[dev_pt_index++] = 8; /* Length */
+	dev_pt[dev_pt_index++] = 0; /* Request with no payload */
+	dev_pt[dev_pt_index++] = 0;	
+	dev_pt[dev_pt_index++] = 0;	
+	break;
+
+    case DEV_TAG_GET_OVERSCAN: /* DA RIVEDERE */
     case DEV_TAG_SET_OVERSCAN:
 	dev_pt[dev_pt_index++] = 16;
 	dev_pt[dev_pt_index++] = 0; /* Request */
@@ -318,9 +344,11 @@ device_mailbox_property_t* device_propertyGet( device_mailbox_tag_t tag )
         return NULL;
 
     /* Return the required data */
-    property.byte_length = tag_buffer[T_OVALUE_SIZE];
-    property.indicator = tag_buffer[T_ORESPONSE];
-    blib_memcpy( (void*)&property.buffer[0], (void*)&tag_buffer[T_OVALUE], property.byte_length );
+    property.bufferLength = tag_buffer[T_OVALUE_SIZE];
+    property.valueLength = tag_buffer[T_ORESPONSE] & 0x7FFFFFFF;
+    property.indicator = tag_buffer[T_ORESPONSE] & 0x80000000;
+    
+    blib_memcpy( (void*)&property.buffer[0], (void*)&tag_buffer[T_OVALUE], property.bufferLength );
 
     return &property;
 }
